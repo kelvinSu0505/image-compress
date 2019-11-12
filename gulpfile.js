@@ -4,7 +4,9 @@ var gulp = require('gulp'),
     cssUglify = require('gulp-minify-css'),            // 压缩css
     imageMin = require('gulp-imagemin'),               // 压缩图片1  效果不是很好
     tinypngNokey = require('gulp-tinypng-nokey'),      // 压缩图片2  效果比 gulp-imagemin 好
-    tinypng = require('gulp-tinypng-compress');        // 压缩图片3 需要有KEY,下面有将怎样获取KEY值   花钱的就是效果好，3种图片压缩效果最好的
+    tinypng = require('gulp-tinypng-compress'),        // 压缩图片3 需要有KEY,下面有将怎样获取KEY值   花钱的就是效果好，3种图片压缩效果最好的
+    upload = require('gulp-qcloud-cos-upload'),       // 图片上传插件
+    del = require('del');
 
  
 // 压缩 js 文件
@@ -30,7 +32,11 @@ gulp.task('css',async() => {
         .pipe(gulp.dest('dist/css'))
 })
 
+
+
+
 // 压缩图片1 
+
 gulp.task('image',async() => {
     await gulp.src('images/*.*')
         .pipe(imageMin({
@@ -41,14 +47,21 @@ gulp.task('image',async() => {
         }))
         .pipe(gulp.dest('dist/images'))
 })
+
+
+
 // 压缩图片2 
+
 gulp.task('tp',async() => {
     await gulp.src('images/*.{png,jpg,jpeg,gif}')
         .pipe(tinypngNokey())
         .pipe(gulp.dest('dist/images'))
 })
 
+
+
 // 压缩图片3
+
 gulp.task('tinypng', async() => {
     await gulp.src('images/*.{png,jpg,jpeg,gif}')
         .pipe(tinypng({
@@ -58,13 +71,50 @@ gulp.task('tinypng', async() => {
         }))
         .pipe(gulp.dest('dist/images'));
 })
- 
-gulp.task('default',function(){
+
+
+// 上传到腾讯云对象存储
+
+gulp.task(
+    'upload',
+    ()=> gulp.src(['**/*'],{
+        // 必要参数，用于计算相对路径
+        cwd: './dist/images/'
+    }).pipe(upload({
+        // 日志是否呈现为cdn路径，默认为 ''，设为具体域名可以替换 cdn 域名。
+        cdn: true,
+        // 是否开启调试模式，默认为 false，调试模式下，报错时输出详细错误信息
+        debug: false,
+        // 是否在控制台打印上传日志，默认为 true
+        log: true,
+        // 是否允许文件覆盖，默认为 false
+        overwrite: false,
+        // 在腾讯云申请的 AppId
+        AppId: '1258301795',
+        // 配置腾讯云 COS 服务所需的 SecretId
+        SecretId: 'AKIDMbhg0cTc0MvUxID4z1vxujPxRnyDYB6q',
+        // 配置腾讯云 COS 服务所需的 SecretKey
+        SecretKey: 'nRwJUWLJ9qPr9GD681iHi8QXa1GKKNKD',
+        // COS服务配置的存储桶名称
+        Bucket: 'sh-image-1258301795',
+        // 地域名称
+        Region: 'ap-shanghai',
+        // 前缀路径，所有文件上传到这个路径下
+        prefix: 'upload'
+    }))
+)
+
+
+
+// 删除dist文件夹下的所有文件
+
+gulp.task('del', async ()=>{
+    await del('dist/**/*');
+});
+
+
+// 执行队列
+
+gulp.task('default', gulp.series('del','tinypng',function(){
     console.log('default')
-})
-
-
-// process.on('unhandledRejection', (reason, p) => {
-//     console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-// // application specific logging, throwing an error, or other logic here
-// // });
+}))
