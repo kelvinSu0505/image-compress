@@ -1,6 +1,6 @@
 {
   "name": "image-compress",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
     "gulp-qcloud-cos-upload": "^1.1.2",
     "gulp-tinypng-compress": "^1.2.1",
     "gulp-tinypng-nokey": "^1.1.0",
-    "gulp-uglify": "^3.0.1"
+    "gulp-uglify": "^3.0.1",
+    "images": "^3.0.2"
   }
 }
