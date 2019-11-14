@@ -110,6 +110,8 @@ gulp.task(
 
 gulp.task('del', async ()=>{
     await del('dist/**/*');
+    await del('ready_image/*');
+    await del('images/*');
 });
 
 
